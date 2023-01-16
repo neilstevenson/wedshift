@@ -16,47 +16,33 @@
 
 package neil.demo;
 
-import java.util.Date;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import com.hazelcast.core.HazelcastInstance;
 
 @Configuration
-@Order(value = 4)
-public class ApplicationRunner4 implements CommandLineRunner {
-	private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationRunner4.class);
+@Order(value = 5)
+public class ApplicationRunner5 implements CommandLineRunner {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationRunner5.class);
+
+    private static final String DESTINATION =
+            "/" + MyConstants.STOMP_QUEUE_PREFIX
+            + "/" + MyConstants.STOMP_QUEUE_SUFFIX;
+	private static final String RUNTIME = MyUtils.getNow();
 
     @Autowired
     private HazelcastInstance hazelcastInstance;
+    @Autowired
+    private SimpMessagingTemplate simpMessagingTemplate;
 
 	@Override
 	public void run(String... args) throws Exception {
-        String mapName = "neil";
-        
-        String mapping = "CREATE OR REPLACE MAPPING " + mapName
-                        + " TYPE IMap "
-                        + " OPTIONS ( "
-                        + " 'keyFormat' = 'java',"
-                        + " 'keyJavaClass' = '" + String.class.getName() + "',"                         
-                        + " 'valueFormat' = 'java',"
-                        + " 'valueJavaClass' = '" + Date.class.getName() + "'"                          
-                        + " )";
-        LOGGER.info(mapping);
-
-        hazelcastInstance.getSql().execute(mapping);
-        
-        hazelcastInstance.getMap(mapName).put("hello", new Date());
-        
-        String query = "SELECT * FROM " + mapName;
-        LOGGER.info(query);
-
-        hazelcastInstance.getSql().execute(query).forEach(sqlRow -> LOGGER.info("SqlRow: {}", sqlRow));
     }
 
 }
