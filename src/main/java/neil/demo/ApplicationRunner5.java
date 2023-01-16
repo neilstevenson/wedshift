@@ -16,6 +16,13 @@
 
 package neil.demo;
 
+import java.util.Collection;
+import java.util.Objects;
+import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +32,12 @@ import org.springframework.core.annotation.Order;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastJsonValue;
+import com.hazelcast.jet.Job;
+import com.hazelcast.jet.Observable;
+import com.hazelcast.jet.config.JobConfig;
+import com.hazelcast.jet.core.JobStatus;
+import com.hazelcast.jet.pipeline.Pipeline;
 
 @Configuration
 @Order(value = 5)
@@ -34,7 +47,6 @@ public class ApplicationRunner5 implements CommandLineRunner {
     private static final String DESTINATION =
             "/" + MyConstants.STOMP_QUEUE_PREFIX
             + "/" + MyConstants.STOMP_QUEUE_SUFFIX;
-	private static final String RUNTIME = MyUtils.getNow();
 
     @Autowired
     private HazelcastInstance hazelcastInstance;
@@ -43,6 +55,100 @@ public class ApplicationRunner5 implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
+        this.launchProfileToPosition();
+        this.launchPositionToWebsocket();
+        try {
+            while (true) {
+                    TimeUnit.MINUTES.sleep(1L);
+                    this.logJobs();
+            }
+        } catch (Exception e) {
+            LOGGER.error("Shutting down", e);
+            this.hazelcastInstance.shutdown();
+        }
     }
 
+	private void launchProfileToPosition() {
+		String jobName = MyConstants.IMAP_PROFILE + "_TO_" + MyConstants.IMAP_POSITION + "_" + MyUtils.getNow();
+
+		Pipeline pipeline = ProfileToPosition.build();
+
+		JobConfig jobConfig = new JobConfig();
+		jobConfig.addClass(ProfileToPosition.class);
+		jobConfig.setName(jobName);
+
+		this.checkedSubmit(pipeline, jobConfig);
+	}
+
+	private Observable<HazelcastJsonValue> observableToWebsocket() {
+		Observable<HazelcastJsonValue> observable = this.hazelcastInstance.getJet().newObservable();
+		AtomicInteger count = new AtomicInteger(0);
+
+		observable.addObserver(event -> {
+			int i = count.getAndIncrement();
+			if (i % MyConstants.LOG_EVERY == 0) {
+				String message = String.format("%6d : Observed '%s'", i, event.toString());
+                LOGGER.info(message);
+			}
+        
+			this.simpMessagingTemplate.convertAndSend(DESTINATION, event.toString());
+		});
+
+		return observable;
+	}
+
+	private void launchPositionToWebsocket() {
+		String jobName = MyConstants.IMAP_POSITION + "_FOR_" + this.hazelcastInstance.getName() + "_" + MyUtils.getNow();
+
+		Observable<HazelcastJsonValue> observable = this.observableToWebsocket();
+
+		Pipeline pipeline = PositionObserver.build(observable);
+
+		JobConfig jobConfig = new JobConfig();
+		jobConfig.addClass(PositionObserver.class);
+		jobConfig.setName(jobName);
+
+		this.checkedSubmit(pipeline, jobConfig);
+	}
+
+	private void checkedSubmit(Pipeline pipeline, JobConfig jobConfig) {
+		jobConfig.setName(jobConfig.getName() + System.currentTimeMillis());
+		jobConfig.setMetricsEnabled(true);
+		LOGGER.info("Submitting '{}'", jobConfig.getName());
+		Collection<Job> jobs = this.hazelcastInstance.getJet().getJobs();
+
+		for (Job job : jobs) {
+			if (jobConfig.getName().equals(job.getName())) {
+				LOGGER.error("Not submitting '{}', job already exists '{}' with status: {}", jobConfig.getName(), job, job.getStatus());
+				return;
+			}
+		};
+
+		Job job = this.hazelcastInstance.getJet().newJobIfAbsent(pipeline, jobConfig);
+		LOGGER.info("Submitted '{}'", job);
+	}
+
+	private void logJobs() {
+		LOGGER.info("----- JOBS:");
+		Collection<Job> jobs = this.hazelcastInstance.getJet().getJobs();
+		try {
+			Collection<String> names = jobs.stream()
+                        .map(Job::getName)
+                        .collect(Collectors.toCollection(TreeSet::new));
+        
+			names.forEach(name -> {
+                jobs.stream()
+                .filter(job -> job.getName().equals(name))
+                .forEach(job -> {
+                        JobStatus jobStatus = job.getStatus();
+                        LOGGER.info("{} {}", name, jobStatus);
+                });
+			});
+        
+		} catch (Exception e) {
+			String message = String.format("logJobs(): %s", Objects.toString(e.getMessage()));
+			LOGGER.error(message);
+		}
+		LOGGER.info("-----");
+	}
 }

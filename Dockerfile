@@ -2,7 +2,7 @@ FROM quay.io/centos/s390x:stream9
 
 WORKDIR /build
 
-RUN echo Version 16
+RUN echo Version 17
 
 RUN echo arch
 RUN arch
