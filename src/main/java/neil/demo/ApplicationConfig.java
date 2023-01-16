@@ -34,6 +34,8 @@ public class ApplicationConfig {
 	public ClientConfig clientConfig() {
 		ClientConfig clientConfig = new ClientConfig();
 		
+		clientConfig.setInstanceName("neil");
+		
 		Set<String> labels = new TreeSet<>(List.of("neil"));
 		clientConfig.setLabels(labels);
 

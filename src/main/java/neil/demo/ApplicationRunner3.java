@@ -19,9 +19,7 @@ package neil.demo;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -36,7 +34,6 @@ import org.springframework.core.io.Resource;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastJsonValue;
-import com.hazelcast.jet.datamodel.Tuple2;
 import com.hazelcast.map.IMap;
 import com.hazelcast.org.json.JSONObject;
 
@@ -54,73 +51,73 @@ public class ApplicationRunner3 implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		List<Resource> resources = this.fileUtils.getResources();
-		List<ApplicationRunner3Callable> tasks = new ArrayList<>();
-		for (int i = 0; i < resources.size(); i++) {
-			long initialDelay = i * MyConstants.DATA_FEED_WRITE_INTERVAL_MS / resources.size();
-			tasks.add(new ApplicationRunner3Callable(this.hazelcastInstance, resources.get(i), initialDelay));
-		}
-		
-		ExecutorService executorService = Executors.newFixedThreadPool(tasks.size());
-		executorService.invokeAll(tasks);
+		long initialDelay = MyConstants.DATA_FEED_WRITE_INTERVAL_MS;
+		ApplicationRunner3Runnable applicationRunner3Runnable
+			= new ApplicationRunner3Runnable(this.hazelcastInstance, resources.get(0), initialDelay);
+
+		ExecutorService executorService = Executors.newSingleThreadExecutor();
+		executorService.execute(applicationRunner3Runnable);
 		TimeUnit.SECONDS.sleep(2L);
 		LOGGER.info("Done");
 	}
 
-	public class ApplicationRunner3Callable implements Callable<Tuple2<String, Integer>> {
+	public class ApplicationRunner3Runnable implements Runnable {
 
 		private final HazelcastInstance hazelcastInstance;
 		private final Resource resource;
 		private final long initialDelay;
 
-		ApplicationRunner3Callable(HazelcastInstance arg0, Resource arg1, long arg2) {
+		ApplicationRunner3Runnable(HazelcastInstance arg0, Resource arg1, long arg2) {
 			this.hazelcastInstance = arg0;
 			this.resource = arg1;
 			this.initialDelay = arg2;
 		}
 		
 		@Override
-		public Tuple2<String, Integer> call() throws Exception {
+		public void run() {
 			int count = 0;
 			String key = this.resource.getFilename().split("\\.")[0];
             String line;
 			IMap<String, HazelcastJsonValue> profileMap = this.hazelcastInstance.getMap(MyConstants.IMAP_PROFILE);
-	        try (BufferedReader bufferedReader =
-	                new BufferedReader(
-	                        new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
-	        	TimeUnit.MILLISECONDS.sleep(initialDelay);
-	        	while ((line = bufferedReader.readLine()) != null) {
-	            	// Latitude, Longitude
-	            	String[] tokens = line.split(",");
+			try {
+		        try (BufferedReader bufferedReader =
+		                new BufferedReader(
+		                        new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
+		        	TimeUnit.MILLISECONDS.sleep(initialDelay);
+		        	while ((line = bufferedReader.readLine()) != null) {
+		            	// Latitude, Longitude
+		            	String[] tokens = line.split(",");
 
-	                try {
-	                	JSONObject json = new JSONObject(profileMap.get(key).toString());
-	                	json.put(MyConstants.JSON_FIELD_LATITUDE, Double.parseDouble(tokens[0]));
-                        json.put(MyConstants.JSON_FIELD_LONGITUDE, Double.parseDouble(tokens[1]));
-                        json.put(MyConstants.JSON_FIELD_UPDATED_BY, PRINCIPAL);
-                        json.put(MyConstants.JSON_FIELD_UPDATED_TIME, MyUtils.getNow());
-                        
-	                	profileMap.set(key, new HazelcastJsonValue(json.toString()));
-	                	
-	                	if (count % MyConstants.LOG_EVERY == 0) {
-	                		String message = String.format("Write %6d for '%s'", count, key);
-	                		LOGGER.info(message);
-	                	}
+		                try {
+		                	JSONObject json = new JSONObject(profileMap.get(key).toString());
+		                	json.put(MyConstants.JSON_FIELD_LATITUDE, Double.parseDouble(tokens[0]));
+	                        json.put(MyConstants.JSON_FIELD_LONGITUDE, Double.parseDouble(tokens[1]));
+	                        json.put(MyConstants.JSON_FIELD_UPDATED_BY, PRINCIPAL);
+	                        json.put(MyConstants.JSON_FIELD_UPDATED_TIME, MyUtils.getNow());
+	                        
+		                	profileMap.set(key, new HazelcastJsonValue(json.toString()));
+		                	
+		                	if (count % MyConstants.LOG_EVERY == 0) {
+		                		String message = String.format("Write %6d for '%s'", count, key);
+		                		LOGGER.info(message);
+		                	}
 
-	                	TimeUnit.MILLISECONDS.sleep(MyConstants.DATA_FEED_WRITE_INTERVAL_MS);
+		                	TimeUnit.MILLISECONDS.sleep(MyConstants.DATA_FEED_WRITE_INTERVAL_MS);
 
-	                } catch (Exception e) {
-                		String message = String.format("Line %6d for '%s'", count, key);
-	                	LOGGER.error(message, e);
-	                	break;
-	                }
-	                
-	            	count++;
-	            }
-	        }
-	        
-	        return Tuple2.tuple2(key, count);
+		                } catch (Exception e) {
+	                		String message = String.format("Line %6d for '%s'", count, key);
+		                	LOGGER.error(message, e);
+		                	break;
+		                }
+		                
+		            	count++;
+		            }
+		        }
+			} catch (Exception e2) {
+				LOGGER.error("e2", e2);
+			}
+	        LOGGER.info("End {}", this);
 		}
-		
 	}
 
 }
