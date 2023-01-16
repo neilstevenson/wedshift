@@ -1,8 +1,8 @@
-FROM quay.io/ibmgaragecloud/maven
+FROM quay.io/ibmgaragecloud/maven:3.6.3-jdk-11-slim
 
 WORKDIR /build
 
-RUN echo Version 3
+RUN echo Version 4
 
 RUN echo arch
 RUN arch
