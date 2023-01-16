@@ -1,18 +1,17 @@
-#FROM quay.io/centos/s390x:stream9
-FROM openjdk-17-ubi8
+FROM quay.io/centos/s390x:stream9
 
 WORKDIR /build
 
-RUN echo Version 7
+RUN echo Version 8
 
 RUN echo arch
 RUN arch
-#RUN echo yum -y install java
-#RUN yum -y install java
+#$RUN echo yum -y install java
+RUN yum -y install java
 RUN echo java --version
 RUN java --version
-#RUN echo yum -y install maven
-#RUN yum -y install maven
+RUN echo yum -y install maven
+RUN yum -y install maven
 RUN echo mvn -version
 RUN mvn -version
 
