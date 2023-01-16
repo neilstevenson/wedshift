@@ -16,6 +16,10 @@
 
 package neil.demo;
 
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -23,6 +27,15 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Application {
 
 	public static void main(String[] args) throws Exception {
+		Set<String> keys = System.getProperties().keySet()
+				.stream()
+				.map(key -> key.toString())
+				.collect(Collectors.toCollection(TreeSet::new));
+
+		System.out.println("====================");
+		keys.forEach(key -> System.out.println(key + "==" + System.getProperty(key)));
+		System.out.println("====================");
+
 		SpringApplication.run(Application.class, args);
 	}
 
