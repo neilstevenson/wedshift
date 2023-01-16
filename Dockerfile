@@ -1,11 +1,8 @@
-#FROM --platform=linux/s390x quay.io/devfile/maven:3.8.1-openjdk-17-slim
-#FROM quay.io/devfile/maven:3.8.1-openjdk-17-slim
-#FROM openjdk:17
-FROM quay.io/devfile/maven:3.3.3-jdk-9
+FROM s390x/maven:ibmjava
 
 WORKDIR /build
 
-RUN echo Version 1
+RUN echo Version 2
 
 RUN echo arch
 RUN arch
