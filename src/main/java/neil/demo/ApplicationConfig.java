@@ -36,8 +36,11 @@ public class ApplicationConfig {
 		
 		Set<String> labels = new TreeSet<>(List.of("neil"));
 		clientConfig.setLabels(labels);
-		
-		clientConfig.getNetworkConfig().addAddress("10.128.0.240").addAddress("10.128.0.241").addAddress("10.128.0.242");
+
+		clientConfig.getNetworkConfig().getKubernetesConfig()
+		.setEnabled(true)
+		//FIXME .setUsePublicIp(false)
+		.setProperty("service-dns", "neil-hazelcast.neil.svc.cluster.local");
 		
         clientConfig.getConnectionStrategyConfig()
         .setReconnectMode(ReconnectMode.OFF)
