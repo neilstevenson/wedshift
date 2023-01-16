@@ -26,6 +26,12 @@
 		<my.docker.image.name>${project.artifactId}</my.docker.image.name>
 		<my.docker.jar.file>${project.artifactId}.jar</my.docker.jar.file>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		
+		<jquery.version>3.6.1</jquery.version>
+        <leaflet.version>1.8.0</leaflet.version>
+        <sockjs-client.version>1.5.1</sockjs-client.version>
+        <stomp-websocket.version>2.3.4</stomp-websocket.version>
+        <webjars-locator-core.version>0.52</webjars-locator-core.version>  
 	</properties>
 
 	<dependencies>
@@ -52,8 +58,34 @@
         </dependency>
 		<dependency>
 	        <groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
+
+               <dependency>
+                        <groupId>org.webjars</groupId>
+                        <artifactId>jquery</artifactId>
+                        <version>${jquery.version}</version>
+                </dependency>
+                <dependency>
+                        <groupId>org.webjars</groupId>
+                        <artifactId>leaflet</artifactId>
+                        <version>${leaflet.version}</version>
+                </dependency>
+                <dependency>
+                        <groupId>org.webjars</groupId>
+                        <artifactId>sockjs-client</artifactId>
+                        <version>${sockjs-client.version}</version>
+                </dependency>
+                <dependency>
+                        <groupId>org.webjars</groupId>
+                        <artifactId>stomp-websocket</artifactId>
+                        <version>${stomp-websocket.version}</version>
+                </dependency>
+                <dependency>
+                        <groupId>org.webjars</groupId>
+                        <artifactId>webjars-locator-core</artifactId>
+                        <version>${webjars-locator-core.version}</version>
+                </dependency>
 	</dependencies>
 
 	<build>

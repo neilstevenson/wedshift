@@ -7,8 +7,15 @@
 	<div th:insert="~{fragments :: header}">?</div>
 
 	<noscript>You need to enable JavaScript to run this app.</noscript>
-    <div class="major_pane" id="root"></div>
-    <script src="built/bundle.js"></script>
+    <div class="major_pane" id="root">
+		 <div id="map" style="height: 768px; position: relative; padding: 0px; margin: 0 auto 0 auto;"/>
+	</div>
+    
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/leaflet/leaflet.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="/app.js"></script>
     
 	<div th:insert="~{fragments :: footer}">?</div>
 </body>

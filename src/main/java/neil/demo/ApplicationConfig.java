@@ -39,7 +39,6 @@ public class ApplicationConfig {
 
 		clientConfig.getNetworkConfig().getKubernetesConfig()
 		.setEnabled(true)
-		//FIXME .setUsePublicIp(false)
 		.setProperty("service-dns", "neil-hazelcast.neil.svc.cluster.local");
 		
         clientConfig.getConnectionStrategyConfig()
