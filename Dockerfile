@@ -1,8 +1,8 @@
-FROM s390x/maven:ibmjava
+FROM quay.io/ibmgaragecloud/maven
 
 WORKDIR /build
 
-RUN echo Version 2
+RUN echo Version 3
 
 RUN echo arch
 RUN arch
