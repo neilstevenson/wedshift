@@ -2,6 +2,13 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<!-- Java 11, so cannot use 3 -->
+		<version>2.7.7</version>
+	</parent>
 
 	<groupId>neil.demo</groupId>
 	<artifactId>wedshift</artifactId>
@@ -9,9 +16,6 @@
 
 	<properties>
 		<docker-maven-plugin.version>0.40.2</docker-maven-plugin.version>
-		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-		<!-- Java 11, so cannot use 3 -->
-		<spring-boot.version>2.7.7</spring-boot.version>
 
 		<hazelcast.version>5.2.1</hazelcast.version>
 		<java.version>11</java.version>
@@ -43,6 +47,15 @@
 			</exclusions>
 		</dependency>
 		-->
+		
+		<dependency>
+	        <groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+		<dependency>
+	        <groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
 	</dependencies>
 
 	<build>
@@ -58,7 +71,6 @@
 			<plugins>
 				<plugin>
 					<artifactId>maven-compiler-plugin</artifactId>
-					<version>${maven-compiler-plugin.version}</version>
 					<configuration>
 						<encoding>${project.build.sourceEncoding}</encoding>
                         <release>${java.version}</release>
@@ -67,7 +79,6 @@
 				<plugin>
 					<groupId>org.springframework.boot</groupId>
                 	<artifactId>spring-boot-maven-plugin</artifactId>
-                	<version>${spring-boot.version}</version>
                 	<executions>
 						<execution>
 							<phase>package</phase>

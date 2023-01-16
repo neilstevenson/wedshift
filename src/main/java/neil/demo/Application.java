@@ -16,30 +16,14 @@
 
 package neil.demo;
 
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+@SpringBootApplication
 public class Application {
 
 	public static void main(String[] args) throws Exception {
-		Set<String> keys = System.getProperties().keySet()
-				.stream()
-				.map(key -> key.toString())
-				.filter(key -> key.startsWith("hazelcast"))
-				.collect(Collectors.toCollection(TreeSet::new));
-
-		if (keys.size()==0) {
-			System.out.println("No hazelcast properties, exiting");
-			System.exit(0);
-		}
-
-		System.out.println("====================");
-		keys.forEach(key -> System.out.println(key + " :: value len==" + System.getProperty(key).length()));
-		System.out.println("====================");
-
-		TimeUnit.MINUTES.sleep(20L);
+		SpringApplication.run(Application.class, args);
 	}
 
 }
