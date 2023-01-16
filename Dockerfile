@@ -1,13 +1,19 @@
-FROM quay.io/ibmgaragecloud/maven:3.6.3-jdk-11-slim
+FROM quay.io/centos/s390x:stream9
 
 WORKDIR /build
 
-RUN echo Version 4
+RUN echo Version 6
 
 RUN echo arch
 RUN arch
-RUN echo java -version
-RUN java -version
+RUN echo yum -y install java
+RUN yum -y install java
+RUN echo java --version
+RUN java --version
+RUN echo yum -y install maven
+RUN yum -y install maven
+RUN echo mvn -version
+RUN mvn -version
 
 COPY pom.xml .
 COPY src src
@@ -31,9 +37,7 @@ CMD ["bash", "-c", "set -euo pipefail \
       && echo java $JAVA_ARGS $JAVA_OPTS \
  -Dhazelcast.enterprise.license.key=${MY_HAZELCAST_LICENSE} \
  -Dlogback.statusListenerClass=ch.qos.logback.core.status.NopStatusListener \
- -jar application.jar \
-      && echo sleep 60 \
-      && sleep 60 \
+ -jar /build/target/wedshift.jar \
       && java $JAVA_ARGS $JAVA_OPTS \
  -Dhazelcast.enterprise.license.key=${MY_HAZELCAST_LICENSE} \
  -Dlogback.statusListenerClass=ch.qos.logback.core.status.NopStatusListener \

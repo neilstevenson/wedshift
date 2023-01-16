@@ -10,7 +10,8 @@
 	<properties>
 		<docker-maven-plugin.version>0.40.2</docker-maven-plugin.version>
 		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
-		<spring-boot.version>3.0.1</spring-boot.version>
+		<!-- Java 11, so cannot use 3 -->
+		<spring-boot.version>2.7.7</spring-boot.version>
 
 		<hazelcast.version>5.2.1</hazelcast.version>
 		<java.version>11</java.version>
