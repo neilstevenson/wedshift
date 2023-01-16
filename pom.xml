@@ -1,0 +1,143 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>neil.demo</groupId>
+	<artifactId>wedshift</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<properties>
+		<docker-maven-plugin.version>0.40.2</docker-maven-plugin.version>
+		<maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+		<spring-boot.version>3.0.1</spring-boot.version>
+
+		<hazelcast.version>5.2.1</hazelcast.version>
+		<java.version>11</java.version>
+		
+		<!-- For Docker image -->
+		<dockerfile.skip>true</dockerfile.skip>
+		<my.docker.image.hlq>${user.name}</my.docker.image.hlq>
+		<my.docker.image.name>${project.artifactId}</my.docker.image.name>
+		<my.docker.jar.file>${project.artifactId}.jar</my.docker.jar.file>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+		<!--
+		<dependency>
+			<groupId>com.hazelcast</groupId>
+			<artifactId>hazelcast</artifactId>
+			<version>${hazelcast.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.hazelcast</groupId>
+			<artifactId>hazelcast-sql</artifactId>
+			<version>${hazelcast.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.hazelcast</groupId>
+					<artifactId>hazelcast</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		-->
+	</dependencies>
+
+	<build>
+		<finalName>${project.artifactId}</finalName>
+
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+		
+			<plugins>
+				<plugin>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>${maven-compiler-plugin.version}</version>
+					<configuration>
+						<encoding>${project.build.sourceEncoding}</encoding>
+                        <release>${java.version}</release>
+					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.springframework.boot</groupId>
+                	<artifactId>spring-boot-maven-plugin</artifactId>
+                	<version>${spring-boot.version}</version>
+                	<executions>
+						<execution>
+							<phase>package</phase>
+							<goals>
+								<goal>repackage</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>io.fabric8</groupId>
+                	<artifactId>docker-maven-plugin</artifactId>
+                    <version>${docker-maven-plugin.version}</version>
+                    <configuration>
+                        <imagePullPolicy>IFNOTPRESENT</imagePullPolicy>
+                        <images>
+                            <image>
+                            	<build>
+									<!-- HARD CODE
+                            		<args>
+                            			<JAR_FILE>${my.docker.jar.file}</JAR_FILE>
+                            		</args>
+                            		-->
+									<buildx>
+                                    	<platforms>
+                                            <platform>linux/arm64</platform>
+                                        	<platform>linux/x86_64</platform>
+                                        	<platform>linux/s390x</platform>
+                                        </platforms>
+                                    </buildx>
+                                    <dockerFile>${project.basedir}/Dockerfile</dockerFile>
+                            	</build>
+                                <name>${my.docker.image.hlq}/${my.docker.image.name}</name>
+                            </image>
+                        </images>
+						<skip>${dockerfile.skip}</skip>
+                        <verbose>true</verbose>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <id>default</id>
+                            <goals>
+                                <goal>build</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+				</plugin>
+			</plugins>
+	</build>
+
+	<repositories>
+		<repository>
+			<id>Hazelcast Release Repository</id>
+			<url>https://repository.hazelcast.com/release/</url>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+
+
+        <profiles>
+                <profile>
+                        <id>release</id>
+                        <properties>
+                                <dockerfile.skip>false</dockerfile.skip>
+                        </properties>
+                </profile>
+        </profiles>
+</project>
