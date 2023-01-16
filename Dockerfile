@@ -6,7 +6,7 @@ RUN echo Version 8
 
 RUN echo arch
 RUN arch
-#$RUN echo yum -y install java
+RUN echo yum -y install java
 RUN yum -y install java
 RUN echo java --version
 RUN java --version
