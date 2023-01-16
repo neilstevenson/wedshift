@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -59,7 +60,10 @@ public class ApplicationRunner3 implements CommandLineRunner {
 			tasks.add(new ApplicationRunner3Callable(this.hazelcastInstance, resources.get(i), initialDelay));
 		}
 		
-		Executors.newFixedThreadPool(tasks.size());
+		ExecutorService executorService = Executors.newFixedThreadPool(tasks.size());
+		executorService.invokeAll(tasks);
+		TimeUnit.SECONDS.sleep(2L);
+		LOGGER.info("Done");
 	}
 
 	public class ApplicationRunner3Callable implements Callable<Tuple2<String, Integer>> {

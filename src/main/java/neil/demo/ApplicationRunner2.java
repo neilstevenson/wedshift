@@ -16,6 +16,8 @@
 
 package neil.demo;
 
+import java.util.concurrent.TimeUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +64,8 @@ public class ApplicationRunner2 implements CommandLineRunner {
 			profileMap.set(key, value);
 			LOGGER.info("'{}'.set('{}', '{}')", profileMap.getName(), key, value);
 		});
+		TimeUnit.SECONDS.sleep(2L);
+		LOGGER.info("Done");
 	}
 
 }

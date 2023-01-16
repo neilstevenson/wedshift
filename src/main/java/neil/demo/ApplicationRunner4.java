@@ -17,6 +17,7 @@
 package neil.demo;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,6 +58,8 @@ public class ApplicationRunner4 implements CommandLineRunner {
         LOGGER.info(query);
 
         hazelcastInstance.getSql().execute(query).forEach(sqlRow -> LOGGER.info("SqlRow: {}", sqlRow));
+		TimeUnit.SECONDS.sleep(2L);
+		LOGGER.info("Done");
     }
 
 }

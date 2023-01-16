@@ -17,7 +17,10 @@
 package neil.demo;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +33,8 @@ import com.hazelcast.core.HazelcastInstance;
 @Configuration
 @Order(value = 1)
 public class ApplicationRunner1 implements CommandLineRunner {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationRunner1.class);
+	
 	@Autowired
 	private HazelcastInstance hazelcastInstance;
 
@@ -49,6 +53,8 @@ public class ApplicationRunner1 implements CommandLineRunner {
 		this.addMappings();
 
 		MyConstants.IMAPS.forEach(this.hazelcastInstance::getMap);
+		TimeUnit.SECONDS.sleep(2L);
+		LOGGER.info("Done");
 	}
 	
 	private void addMappings() {
